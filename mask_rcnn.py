@@ -15,6 +15,9 @@ import mrcnn.model as modellib
 from mrcnn import visualize
 from mrcnn.config import Config
 
+import tensorflow as tf
+import keras as K
+
 # Directory to save logs and trained model
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
@@ -56,7 +59,7 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
 
 class MaskRcnn:
     modelmskrcnn = None
-
+    graph_mskrcnn = None
     @staticmethod
     def filter_class_ids(r):
 
@@ -76,13 +79,20 @@ class MaskRcnn:
 
     @staticmethod
     def get_colored_frame(batch_frames):
-        if MaskRcnn.modelmskrcnn is None:
-            # Create model object in inference mode.
-            MaskRcnn.modelmskrcnn = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
-            # Load weights trained on MS-COCO
-            MaskRcnn.modelmskrcnn.load_weights(COCO_MODEL_PATH, by_name=True)
+        if MaskRcnn.graph_mskrcnn is None:
+            MaskRcnn.graph_mskrcnn = tf.Graph()
 
-        results = MaskRcnn.modelmskrcnn.detect(batch_frames, verbose=0)
+        if MaskRcnn.modelmskrcnn is None:
+            with MaskRcnn.graph_mskrcnn.as_default():
+                sess = tf.Session()
+                K.backend.set_session(sess)
+                # Create model object in inference mode.
+                MaskRcnn.modelmskrcnn = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
+                # Load weights trained on MS-COCO
+                MaskRcnn.modelmskrcnn.load_weights(COCO_MODEL_PATH, by_name=True)
+
+        with MaskRcnn.graph_mskrcnn.as_default():
+            results = MaskRcnn.modelmskrcnn.detect(batch_frames, verbose=0)
         results = [MaskRcnn.filter_class_ids(res) for res in results]
 
         res_frames = []
