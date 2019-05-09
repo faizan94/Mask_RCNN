@@ -26,7 +26,7 @@ modelmskrcnn = None
 MODEL_DIR = os.path.join(ROOT_DIR, "logs")
 
 
-COCO_MODEL_PATH = os.path.join(ROOT_DIR, "model/mask_rcnn_coco.h5")
+COCO_MODEL_PATH = os.path.join(ROOT_DIR, "brain/mask_rcnn_coco.h5")
 # Download COCO trained weights from Releases if needed
 if not os.path.exists(COCO_MODEL_PATH):
     utils.download_trained_weights(COCO_MODEL_PATH)
@@ -60,19 +60,6 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'keyboard', 'cell phone', 'microwave', 'oven', 'toaster',
                'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                'teddy bear', 'hair drier', 'toothbrush']
-
-if modelmskrcnn is None:
-
-    # Create model object in inference mode.
-    modelmskrcnn = modellib.MaskRCNN(mode="inference", model_dir=MODEL_DIR, config=config)
-
-    # Load weights trained on MS-COCO
-    modelmskrcnn.load_weights(COCO_MODEL_PATH, by_name=True)
-
-    print('model loaded')
-
-exit(0)
-
 
 def filter_class_ids(r):
 
